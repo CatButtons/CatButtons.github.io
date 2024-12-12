@@ -1,70 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta property="og:title" content="Image Example">
-    <meta property="og:description" content="This is an image shared on Discord.">
-    <meta property="og:image" content="" id="og-image">
-    <meta property="og:type" content="image">
-    <meta property="og:url" content="https://example.com">
-    <meta name="twitter:card" content="photo">
-    <meta name="twitter:image" content="" id="twitter-image">
-    <title>Image Page</title>
-    <script>
-        // Function to parse the URL and extract parameters
-        function getImage() {
-            const urlParams = new URLSearchParams(window.location.search);
+<script>
+    // Function to parse the URL and extract parameters
+    function getImage() {
+        const urlParams = new URLSearchParams(window.location.search);
 
-            // Extract parameters from the query string
-            const color = urlParams.get("color") || ""; // Default to empty string if color is not provided
-            const button = urlParams.get("button");  // e.g., "imagename"
-            const htmlFile = urlParams.get("html");  // e.g., "htmlfile"
+        // Extract parameters from the query string
+        const color = urlParams.get("color") || ""; // Default to empty string if color is not provided
+        const button = urlParams.get("button");  // e.g., "imagename"
+        const htmlFile = urlParams.get("html");  // e.g., "htmlfile"
 
-            // Handle missing button or image
-            if (!button) {
-                setImageFallback("404.png"); // Fallback to 404 image in the same repo
-                return;
-            }
-
-            // Combine color and button name to form the image filename (e.g., color=red & button=imagename -> redimagename.png)
-            const imageName = (color + button).toLowerCase() + ".png";  // Combine color and button for the image name
-            const imageUrl = imageName;  // Image is located in the same repo, so use just the image name
-
-            // Set Open Graph and Twitter meta tags dynamically
-            document.getElementById("og-image").setAttribute("content", imageUrl);
-            document.getElementById("twitter-image").setAttribute("content", imageUrl);
-
-            // Set the image element's src
-            const imgElement = document.getElementById("image");
-            imgElement.src = imageUrl;
-
-            // Fallback if the image is not found: use 404.png
-            imgElement.onerror = function() {
-                setImageFallback("404.png"); // Default fallback image (404)
-            };
-
-            // If htmlFile is provided, redirect to the corresponding HTML page
-            if (htmlFile) {
-                const htmlFileName = htmlFile.toLowerCase() + ".html"; // Ensure case-insensitive lookup
-                window.location.href = htmlFileName; // Redirect to the HTML file
-            }
+        // Handle missing button or image
+        if (!button) {
+            setImageFallback("/404.png"); // Correct relative path for 404.png
+            return;
         }
 
-        // Set image fallback and update meta tags
-        function setImageFallback(imageUrl) {
-            document.getElementById("og-image").setAttribute("content", imageUrl);
-            document.getElementById("twitter-image").setAttribute("content", imageUrl);
-            const imgElement = document.getElementById("image");
-            imgElement.src = imageUrl;
-        }
+        // Combine color and button name to form the image filename (e.g., color=red & button=imagename -> redimagename.png)
+        const imageName = (color + button).toLowerCase() + ".png";  // Combine color and button for the image name
+        const imageUrl = imageName;  // Image is located in the same repo, so use just the image name
 
-        // Call getImage when the page loads
-        window.onload = getImage;
-    </script>
-</head>
-<body>
-    <h1 style="display: none;">Image Example</h1>
-    <img id="image" alt="Shared Image" style="max-width: 100%; height: auto;">
-</body>
-</html>
+        // Set Open Graph and Twitter meta tags dynamically
+        document.getElementById("og-image").setAttribute("content", imageUrl);
+        document.getElementById("twitter-image").setAttribute("content", imageUrl);
+
+        // Set the image element's src
+        const imgElement = document.getElementById("image");
+        imgElement.src = imageUrl;
+
+        // Fallback if the image is not found: use 404.png
+        imgElement.onerror = function() {
+            setImageFallback("/404.png"); // Use the correct relative path
+        };
+
+        // If htmlFile is provided, redirect to the corresponding HTML page
+        if (htmlFile) {
+            const htmlFileName = htmlFile.toLowerCase() + ".html"; // Ensure case-insensitive lookup
+            window.location.href = htmlFileName; // Redirect to the HTML file
+        }
+    }
+
+    // Set image fallback and update meta tags
+    function setImageFallback(imageUrl) {
+        document.getElementById("og-image").setAttribute("content", imageUrl);
+        document.getElementById("twitter-image").setAttribute("content", imageUrl);
+        const imgElement = document.getElementById("image");
+        imgElement.src = imageUrl;
+    }
+
+    // Call getImage when the page loads
+    window.onload = getImage;
+</script>
