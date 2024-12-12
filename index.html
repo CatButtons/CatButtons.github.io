@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" content="Image Example">
+    <meta property="og:description" content="This is an image shared on Discord.">
+    <meta property="og:image" content="" id="og-image">
+    <meta property="og:type" content="image">
+    <meta property="og:url" content="https://example.com">
+    <meta name="twitter:card" content="photo">
+    <meta name="twitter:image" content="" id="twitter-image">
+    <title>Image Page</title>
+    <script>
+        // Function to get the image from the URL arguments
+        function getImage() {
+            const url = window.location.href;
+            const baseUrl = "https://image.github.io/"; // Your base URL for the images
+            const path = url.replace(baseUrl, "").slice(1).toLowerCase(); // Remove base URL, leading "/" and convert to lowercase
+
+            // If path is empty, return a default image (404.png)
+            if (path === "") {
+                document.getElementById("og-image").setAttribute("content", "https://example.com/404.png");
+                document.getElementById("twitter-image").setAttribute("content", "https://example.com/404.png");
+                document.getElementById("image").src = "https://example.com/404.png";
+                return;
+            }
+
+            // Handle query string at the end of the URL (e.g., ?dostuff)
+            const urlParams = new URLSearchParams(window.location.search);
+            const nameParam = urlParams.get("name");
+
+            // If a "name" query parameter exists, load the corresponding HTML file (e.g., dostuff.html)
+            if (nameParam) {
+                const htmlFileName = nameParam.toLowerCase() + ".html"; // Ensure case-insensitive lookup
+                
+                // Check if the HTML file exists (basic fallback approach)
+                checkHTMLFile(htmlFileName);
+                return;
+            }
+
+            // Replace slashes (/) in the path with dashes (-) to form the image filename
+            const imageName = path.replace(/\//g, "-") + ".png";
+
+            // Construct the image URL
+            const imageUrl = baseUrl + imageName;
+
+            // Set the Open Graph and Twitter meta tags dynamically
+            document.getElementById("og-image").setAttribute("content", imageUrl);
+            document.getElementById("twitter-image").setAttribute("content", imageUrl);
+
+            // Set the image element's src
+            const imgElement = document.getElementById("image");
+            imgElement.src = imageUrl;
+
+            // Fallback if the image is not found: use 404.png
+            imgElement.onerror = function() {
+                imgElement.src = "https://catbutto/404.png"; // Default fallback image (404)
+                document.getElementById("og-image").setAttribute("content", "https://example.com/404.png");
+                document.getElementById("twitter-image").setAttribute("content", "https://example.com/404.png");
+            };
+        }
+
+        // Function to check if the HTML file exists
+        function checkHTMLFile(fileName) {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', fileName, true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        // If file exists, redirect to it
+                        window.location.href = fileName;
+                    } else {
+                        // If the file doesn't exist, redirect to a 404 page
+                        window.location.href = "404.html"; // Redirect to 404 page
+                    }
+                }
+            };
+            xhr.send();
+        }
+
+        // Call getImage when the page loads
+        window.onload = getImage;
+    </script>
+</head>
+<body>
+    <h1 style="display: none;">Image Example</h1>
+    <img id="image" alt="Shared Image" style="max-width: 100%; height: auto;">
+</body>
+</html>
