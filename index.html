@@ -12,40 +12,26 @@
     <meta name="twitter:image" content="" id="twitter-image">
     <title>Image Page</title>
     <script>
-        // Function to get the image from the URL arguments
+        // Function to parse the URL and extract parameters
         function getImage() {
-            const url = window.location.href;
-            const baseUrl = "https://image.github.io/"; // Your base URL for the images
-            const path = url.replace(baseUrl, "").slice(1).toLowerCase(); // Remove base URL, leading "/" and convert to lowercase
-
-            // If path is empty, return a default image (404.png)
-            if (path === "") {
-                document.getElementById("og-image").setAttribute("content", "https://example.com/404.png");
-                document.getElementById("twitter-image").setAttribute("content", "https://example.com/404.png");
-                document.getElementById("image").src = "https://example.com/404.png";
-                return;
-            }
-
-            // Handle query string at the end of the URL (e.g., ?dostuff)
             const urlParams = new URLSearchParams(window.location.search);
-            const nameParam = urlParams.get("name");
 
-            // If a "name" query parameter exists, load the corresponding HTML file (e.g., dostuff.html)
-            if (nameParam) {
-                const htmlFileName = nameParam.toLowerCase() + ".html"; // Ensure case-insensitive lookup
-                
-                // Check if the HTML file exists (basic fallback approach)
-                checkHTMLFile(htmlFileName);
+            // Extract parameters from the query string
+            const color = urlParams.get("color") || ""; // Default to empty string if color is not provided
+            const button = urlParams.get("button");  // e.g., "imagename"
+            const htmlFile = urlParams.get("html");  // e.g., "htmlfile"
+
+            // Handle missing button or image
+            if (!button) {
+                setImageFallback("404.png"); // Fallback to 404 image in the same repo
                 return;
             }
 
-            // Replace slashes (/) in the path with dashes (-) to form the image filename
-            const imageName = path.replace(/\//g, "-") + ".png";
+            // Combine color and button name to form the image filename (e.g., color=red & button=imagename -> redimagename.png)
+            const imageName = (color + button).toLowerCase() + ".png";  // Combine color and button for the image name
+            const imageUrl = imageName;  // Image is located in the same repo, so use just the image name
 
-            // Construct the image URL
-            const imageUrl = baseUrl + imageName;
-
-            // Set the Open Graph and Twitter meta tags dynamically
+            // Set Open Graph and Twitter meta tags dynamically
             document.getElementById("og-image").setAttribute("content", imageUrl);
             document.getElementById("twitter-image").setAttribute("content", imageUrl);
 
@@ -55,28 +41,22 @@
 
             // Fallback if the image is not found: use 404.png
             imgElement.onerror = function() {
-                imgElement.src = "https://catbutto/404.png"; // Default fallback image (404)
-                document.getElementById("og-image").setAttribute("content", "https://example.com/404.png");
-                document.getElementById("twitter-image").setAttribute("content", "https://example.com/404.png");
+                setImageFallback("404.png"); // Default fallback image (404)
             };
+
+            // If htmlFile is provided, redirect to the corresponding HTML page
+            if (htmlFile) {
+                const htmlFileName = htmlFile.toLowerCase() + ".html"; // Ensure case-insensitive lookup
+                window.location.href = htmlFileName; // Redirect to the HTML file
+            }
         }
 
-        // Function to check if the HTML file exists
-        function checkHTMLFile(fileName) {
-            const xhr = new XMLHttpRequest();
-            xhr.open('GET', fileName, true);
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-                        // If file exists, redirect to it
-                        window.location.href = fileName;
-                    } else {
-                        // If the file doesn't exist, redirect to a 404 page
-                        window.location.href = "404.html"; // Redirect to 404 page
-                    }
-                }
-            };
-            xhr.send();
+        // Set image fallback and update meta tags
+        function setImageFallback(imageUrl) {
+            document.getElementById("og-image").setAttribute("content", imageUrl);
+            document.getElementById("twitter-image").setAttribute("content", imageUrl);
+            const imgElement = document.getElementById("image");
+            imgElement.src = imageUrl;
         }
 
         // Call getImage when the page loads
