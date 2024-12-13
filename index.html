@@ -3,67 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dynamic HTML Loader</title>
+  <title>Dynamic HTML Loader with iframe</title>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const params = new URLSearchParams(window.location.search);
       
-      const appendContent = (htmlContent) => {
-        const container = document.createElement("div");
-        container.innerHTML = htmlContent;
-
-        // Remove all <script> tags to avoid execution in the main thread
-        const scripts = container.querySelectorAll("script");
-        scripts.forEach((script) => {
-          script.remove(); // Remove script tags
-        });
-
-        document.body.appendChild(container); // Add the content
+      const appendIframe = (iframeSrc) => {
+        const iframe = document.createElement("iframe");
+        iframe.src = iframeSrc;
+        iframe.width = "100%";
+        iframe.height = "100vh"; // You can adjust the size as needed
+        iframe.style.border = "none";
+        document.body.appendChild(iframe);
       };
 
       const htmlFile = params.get("html");
       if (htmlFile) {
         const htmlPath = `./${htmlFile}.html`;
 
-        console.log(`Fetching HTML file from: ${htmlPath}`); // Log the fetch URL
-
-        fetch(htmlPath)
-          .then((response) => {
-            console.log(`Response status: ${response.status}`);
-            if (response.ok) {
-              return response.text(); // Get the HTML content as text
-            } else {
-              throw new Error(`Failed to load file: ${htmlFile}.html`);
-            }
-          })
-          .then((htmlContent) => {
-            console.log('HTML content successfully loaded.');
-            
-            // Check if the HTML content contains scripts to be run in the worker
-            if (htmlContent.includes("<script>")) {
-              const jsCode = htmlContent.match(/<script[^>]*>([\s\S]*?)<\/script>/)[1]; // Extract the script
-              
-              // Create a new Web Worker and pass the JS code to it
-              const worker = new Worker(URL.createObjectURL(new Blob([`
-                onmessage = function(e) {
-                  eval(e.data); // Execute the JavaScript code in the worker thread
-                }
-              `], { type: 'application/javascript' })));
-
-              // Send the JS code to the Web Worker
-              worker.postMessage(jsCode);
-            }
-
-            // Insert HTML content into the DOM
-            appendContent(htmlContent);
-          })
-          .catch((error) => {
-            console.error('Error fetching HTML:', error.message);
-            const errorDiv = document.createElement("div");
-            errorDiv.style.color = "red";
-            errorDiv.textContent = `Error: Unable to load ${htmlFile}.html.`;
-            document.body.appendChild(errorDiv);
-          });
+        console.log(`Loading HTML content from: ${htmlPath}`);
+        
+        // Append the iframe with the HTML source
+        appendIframe(htmlPath);
       } else {
         const infoDiv = document.createElement("div");
         infoDiv.textContent = "No HTML file specified in the query parameters.";
@@ -73,7 +34,7 @@
   </script>
 </head>
 <body>
-  <h1>Dynamic Content Loader</h1>
+  <h1>Dynamic HTML Loader</h1>
 </body>
 </html>
 
