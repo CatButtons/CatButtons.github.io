@@ -7,14 +7,25 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const params = new URLSearchParams(window.location.search);
+      
+      const appendContent = (htmlContent) => {
+        const container = document.createElement("div");
+        container.innerHTML = htmlContent;
 
-      // Ensure the HTML file name is extracted correctly
+        // Remove all <script> tags to avoid execution in the main thread
+        const scripts = container.querySelectorAll("script");
+        scripts.forEach((script) => {
+          script.remove(); // Remove script tags
+        });
+
+        document.body.appendChild(container); // Add the content
+      };
+
       const htmlFile = params.get("html");
       if (htmlFile) {
-        // Safely construct the HTML file URL (escape any special characters)
         const htmlPath = `./${htmlFile}.html`;
 
-        console.log(`Fetching HTML file from: ${htmlPath}`);
+        console.log(`Fetching HTML file from: ${htmlPath}`); // Log the fetch URL
 
         fetch(htmlPath)
           .then((response) => {
@@ -27,19 +38,24 @@
           })
           .then((htmlContent) => {
             console.log('HTML content successfully loaded.');
+            
+            // Check if the HTML content contains scripts to be run in the worker
+            if (htmlContent.includes("<script>")) {
+              const jsCode = htmlContent.match(/<script[^>]*>([\s\S]*?)<\/script>/)[1]; // Extract the script
+              
+              // Create a new Web Worker and pass the JS code to it
+              const worker = new Worker(URL.createObjectURL(new Blob([`
+                onmessage = function(e) {
+                  eval(e.data); // Execute the JavaScript code in the worker thread
+                }
+              `], { type: 'application/javascript' })));
 
-            // Create a new Web Worker and pass the HTML content to it
-            const worker = new Worker(URL.createObjectURL(new Blob([`
-              onmessage = function(e) {
-                document.body.innerHTML = e.data;  // Insert the HTML content
-                // Execute JavaScript in the worker thread without blocking the main thread
-                ${htmlContent}
-              }
-            `], { type: 'application/javascript' })));
+              // Send the JS code to the Web Worker
+              worker.postMessage(jsCode);
+            }
 
-            // Send the HTML content to the Web Worker
-            worker.postMessage(htmlContent);
-
+            // Insert HTML content into the DOM
+            appendContent(htmlContent);
           })
           .catch((error) => {
             console.error('Error fetching HTML:', error.message);
@@ -60,3 +76,4 @@
   <h1>Dynamic Content Loader</h1>
 </body>
 </html>
+
