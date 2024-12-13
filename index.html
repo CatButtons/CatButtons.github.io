@@ -1,43 +1,76 @@
 <!DOCTYPE html>
-<html style="height: 100%;">
+<html lang="en">
 <head>
-  <meta name="viewport" content="width=device-width, minimum-scale=0.1">
-  <title>Dynamic Image Loader</title>
-  <style type="text/css" id="operaUserStyle"></style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Content Loader with Image</title>
   <script>
-    // Helper function to parse URL parameters (handles multiple ?)
-    function getParams() {
-      const params = {};
-      const queryString = window.location.search.substring(1);
-      const pairs = queryString.split('?');
-      
-      pairs.forEach((pair) => {
-        const [key, value] = pair.split('=');
-        if (key && value) {
-          params[key] = decodeURIComponent(value);
-        }
-      });
-      return params;
-    }
-
-    // Function to set up the image path based on the URL parameters
     document.addEventListener("DOMContentLoaded", () => {
-      const params = getParams();
-      const color = params.color || "red"; // Default to "red" if no color param
-      const button = params.button || "crash"; // Default to "crash" button
-      const imagePath = `${color}-${button}.png`; // Dynamic image path
+      // Parse the custom URL format with `?` for multiple parameters
+      const params = new URLSearchParams(window.location.search.replace(/\?/g, '&'));
 
-      // Replace the image source in the HTML when it loads
-      const imgElement = document.querySelector('img');
-      imgElement.src = `https://catbuttons.github.io/${imagePath}`;
-      imgElement.alt = `${color}-${button}.png`; // Set the alt text to match the image
+      // Extract parameters from the URL
+      const color = params.get('color') || 'white'; // Default color is white
+      const button = params.get('button') || 'default';
+      const htmlFile = params.get('html') || '';
 
-      // Dynamically change the title based on the image path
-      document.title = `${color}-${button}.png (173×66)`;
+      // Function to generate the image (or simulate it)
+      const generateImage = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 500; // Width of the image
+        canvas.height = 500; // Height of the image
+
+        // Set background color from the color parameter
+        ctx.fillStyle = color;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Add some text on the image
+        ctx.fillStyle = 'black';
+        ctx.font = '30px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(button, canvas.width / 2, canvas.height / 2);
+
+        // Convert canvas to image URL
+        return canvas.toDataURL(); // This is a base64 image URL
+      };
+
+      // Insert the generated image into the page
+      const insertImage = (imageUrl) => {
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        img.style.width = '100%';
+        img.style.height = 'auto';
+        document.body.appendChild(img);
+      };
+
+      // Insert the generated image
+      const imageUrl = generateImage();
+      insertImage(imageUrl);
+
+      // Function to load HTML content in an iframe (as before)
+      const appendIframe = (iframeSrc) => {
+        const iframe = document.createElement("iframe");
+        iframe.src = iframeSrc;
+        iframe.style.width = "100%";
+        iframe.style.height = "100vh";
+        iframe.style.border = "none";
+        iframe.style.position = "absolute";
+        iframe.style.top = "0";
+        iframe.style.left = "0";
+        document.body.appendChild(iframe);
+      };
+
+      // If html file is provided, load it in an iframe
+      if (htmlFile) {
+        const htmlPath = `./${htmlFile}.html`;
+        console.log(`Loading HTML content from: ${htmlPath}`);
+        appendIframe(htmlPath);
+      }
     });
   </script>
 </head>
-<body style="margin: 0px; height: 100%; background-color: rgb(14, 14, 14);">
-  <img style="display: block; -webkit-user-select: none; margin: auto; cursor: zoom-in; background-color: hsl(0, 0%, 90%); transition: background-color 300 ms;" width="150" height="57">
+<body style="margin: 0; overflow: hidden;">
+  <h1>Dynamic Content Loader</h1>
 </body>
 </html>
