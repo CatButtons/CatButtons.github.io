@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html style="height: 100%;">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dynamic Image and HTML Loader</title>
+  <meta name="viewport" content="width=device-width, minimum-scale=0.1">
+  <title>Dynamic Image Loader</title>
+  <style type="text/css" id="operaUserStyle"></style>
   <script>
     // Helper function to parse URL parameters (handles multiple ?)
     function getParams() {
@@ -20,49 +20,24 @@
       return params;
     }
 
-    // Function to load the HTML content or show an image based on the params
+    // Function to set up the image path based on the URL parameters
     document.addEventListener("DOMContentLoaded", () => {
       const params = getParams();
-      const htmlFile = params.html;
       const color = params.color || "red"; // Default to "red" if no color param
-      const button = params.button || "cool"; // Default to "cool" button
+      const button = params.button || "crash"; // Default to "crash" button
       const imagePath = `${color}-${button}.png`; // Dynamic image path
 
-      // If no "html" parameter, load and show the image only
-      if (!htmlFile) {
-        const imageContainer = document.createElement("div");
-        imageContainer.style.textAlign = "center"; // Center the image
-        const imageElement = document.createElement("img");
-        imageElement.src = `https://catbuttons.github.io/${imagePath}`; // Image path
-        imageElement.alt = `${color}-${button}.png`;
-        imageElement.style.maxWidth = "100%";
-        imageElement.style.marginTop = "50px";
-        imageContainer.appendChild(imageElement);
-        document.body.appendChild(imageContainer);
-      } else {
-        // If "html" param exists, fetch and append the HTML content
-        const htmlPath = `./${htmlFile}.html`;
-        console.log(`Loading HTML content from: ${htmlPath}`);
+      // Replace the image source in the HTML when it loads
+      const imgElement = document.querySelector('img');
+      imgElement.src = `https://catbuttons.github.io/${imagePath}`;
+      imgElement.alt = `${color}-${button}.png`; // Set the alt text to match the image
 
-        fetch(htmlPath)
-          .then((response) => response.text())
-          .then((htmlContent) => {
-            const container = document.createElement("div");
-            container.innerHTML = htmlContent;
-            document.body.appendChild(container);
-          })
-          .catch((error) => {
-            const errorDiv = document.createElement("div");
-            errorDiv.style.color = "red";
-            errorDiv.textContent = `Error loading HTML: ${htmlFile}.html`;
-            document.body.appendChild(errorDiv);
-          });
-      }
+      // Dynamically change the title based on the image path
+      document.title = `${color}-${button}.png (173×66)`;
     });
   </script>
 </head>
-<body style="margin: 0; height: 100%; background-color: rgb(14, 14, 14);">
-  <!-- No other content should be here if we're showing the image -->
+<body style="margin: 0px; height: 100%; background-color: rgb(14, 14, 14);">
+  <img style="display: block; -webkit-user-select: none; margin: auto; cursor: zoom-in; background-color: hsl(0, 0%, 90%); transition: background-color 300 ms;" width="150" height="57">
 </body>
 </html>
-
