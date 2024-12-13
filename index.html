@@ -7,29 +7,39 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const params = new URLSearchParams(window.location.search);
-      
+
+      // Helper to safely append elements
+      const appendToBody = (element) => {
+        if (element && document.body) {
+          document.body.appendChild(element);
+        }
+      };
+
       // 1. Handle Image Loading
       const color = params.get("color");
       const button = params.get("button");
       if (color && button) {
         const imageName = `${color}-${button}.png`;
-        const imgElement = document.createElement("img");
         const imagePath = `./${imageName}`;
-        
+
+        const imgElement = document.createElement("img"); // Create image element
+        imgElement.alt = "Dynamic image";
+
         // Check if the image exists
         fetch(imagePath)
           .then((response) => {
             if (response.ok) {
-              imgElement.src = imagePath;
+              imgElement.src = imagePath; // Set source if valid
             } else {
-              imgElement.src = "./404.png";
+              imgElement.src = "./404.png"; // Fallback
             }
           })
           .catch(() => {
-            imgElement.src = "./404.png";
+            imgElement.src = "./404.png"; // Fallback on fetch error
+          })
+          .finally(() => {
+            appendToBody(imgElement); // Ensure element is added to the DOM
           });
-        
-        document.body.appendChild(imgElement);
       }
 
       // 2. Handle HTML Loading
@@ -46,15 +56,15 @@
             }
           })
           .then((htmlContent) => {
-            const div = document.createElement("div");
+            const div = document.createElement("div"); // Create div for HTML content
             div.innerHTML = htmlContent;
-            document.body.appendChild(div);
+            appendToBody(div); // Safely append to DOM
           })
           .catch((error) => {
             console.error(error.message);
             const errorDiv = document.createElement("div");
             errorDiv.textContent = "Requested HTML file not found.";
-            document.body.appendChild(errorDiv);
+            appendToBody(errorDiv);
           });
       }
     });
