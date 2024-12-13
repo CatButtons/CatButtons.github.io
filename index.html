@@ -3,60 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dynamic iframe Resizing</title>
-  <style>
-    /* Container for iframe */
-    #maincontain {
-      width: 85%;
-      float: none;
-      margin-left: 12%;
-    }
-
-    /* Style for iframe */
-    #viewcontent {
-      width: 100%;
-      border: none;
-    }
-  </style>
-</head>
-<body>
-  <div class="menuOut" onMouseOver="this.className='menuIn'" onMouseOut="this.className='menuOut'">
-    <a href="forum_frame.php?forum=guest" target="viewcontent">- Forum Adverts</a>
-  </div>
-
-  <div id="maincontain">
-    <iframe id="viewcontent" name="viewcontent"></iframe>
-  </div>
-
+  <title>Dynamic HTML Loader with iframe</title>
   <script>
-    // Function to resize iframe based on content height
-    function sizeIframeToContent() {
-      var iframe = document.getElementById("viewcontent");
-      try {
-        var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-        var contentHeight = iframeDoc.body.scrollHeight;
-        iframe.style.height = contentHeight + 'px';
-      } catch (err) {
-        console.error("Error resizing iframe: ", err);
-      }
-    }
+    document.addEventListener("DOMContentLoaded", () => {
+      const params = new URLSearchParams(window.location.search);
+      
+      const appendIframe = (iframeSrc) => {
+        const iframe = document.createElement("iframe");
+        iframe.src = iframeSrc;
+        iframe.style.width = "100%"; // Make the iframe take up 100% width
+        iframe.style.height = "100vh"; // Make the iframe take up 100% of the viewport height
+        iframe.style.border = "none"; // Remove any default borders
+        iframe.style.position = "absolute"; // Position it absolutely within the body
+        iframe.style.top = "0"; // Align to the top
+        iframe.style.left = "0"; // Align to the left
+        document.body.appendChild(iframe);
+      };
 
-    // Event listener to adjust iframe height when content is loaded
-    window.addEventListener("message", function(event) {
-      if (event.origin === "http://yourdomain.com") { // Validate the origin
-        if (event.data && event.data.action === "resizeIframe") {
-          sizeIframeToContent();
-        }
-      }
-    });
+      const htmlFile = params.get("html");
+      if (htmlFile) {
+        const htmlPath = `./${htmlFile}.html`;
 
-    // This will ensure that when a new page is loaded, we adjust the height
-    document.querySelectorAll('a').forEach(function(link) {
-      link.addEventListener("click", function() {
-        var iframe = document.getElementById("viewcontent");
-        iframe.onload = sizeIframeToContent;
-      });
+        console.log(`Loading HTML content from: ${htmlPath}`);
+        
+        // Append the iframe with the HTML source
+        appendIframe(htmlPath);
+      } else {
+        const infoDiv = document.createElement("div");
+        infoDiv.textContent = "No HTML file specified in the query parameters.";
+        document.body.appendChild(infoDiv);
+      }
     });
   </script>
+</head>
+<body style="margin: 0; overflow: hidden;"> <!-- Make sure no extra space is added -->
+  <h1>Dynamic HTML Loader</h1>
 </body>
 </html>
