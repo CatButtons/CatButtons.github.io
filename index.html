@@ -4,6 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dynamic HTML Loader with iframe</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%; /* Ensure full height for body and html */
+    }
+    iframe {
+      width: 100%; /* Full width */
+      height: 100%; /* Full height */
+      border: none; /* Remove border from iframe */
+    }
+  </style>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const params = new URLSearchParams(window.location.search);
@@ -11,10 +23,7 @@
       const appendIframe = (iframeSrc) => {
         const iframe = document.createElement("iframe");
         iframe.src = iframeSrc;
-        iframe.width = "100%";
-        iframe.height = "100vh"; // You can adjust the size as needed
-        iframe.style.border = "none";
-        document.body.appendChild(iframe);
+        document.body.appendChild(iframe); // Add iframe to body
       };
 
       const htmlFile = params.get("html");
@@ -37,4 +46,3 @@
   <h1>Dynamic HTML Loader</h1>
 </body>
 </html>
-
