@@ -7,25 +7,14 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const params = new URLSearchParams(window.location.search);
-      
-      const appendContent = (htmlContent) => {
-        const container = document.createElement("div");
-        container.innerHTML = htmlContent;
 
-        // Remove all <script> tags to avoid execution
-        const scripts = container.querySelectorAll("script");
-        scripts.forEach((script) => {
-          script.remove(); // Remove script tags
-        });
-
-        document.body.appendChild(container); // Add the content
-      };
-
+      // Ensure the HTML file name is extracted correctly
       const htmlFile = params.get("html");
       if (htmlFile) {
+        // Safely construct the HTML file URL (escape any special characters)
         const htmlPath = `./${htmlFile}.html`;
 
-        console.log(`Fetching HTML file from: ${htmlPath}`); // Log the fetch URL
+        console.log(`Fetching HTML file from: ${htmlPath}`);
 
         fetch(htmlPath)
           .then((response) => {
@@ -71,5 +60,3 @@
   <h1>Dynamic Content Loader</h1>
 </body>
 </html>
-
-
