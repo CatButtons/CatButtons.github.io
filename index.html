@@ -8,8 +8,9 @@
   <!-- Open Graph Meta Tags for Discord Image Preview -->
   <meta property="og:title" content="Custom Image for Discord">
   <meta property="og:type" content="website">
-  <meta property="og:image" content=""> <!-- Will be dynamically set via JS -->
   <meta property="og:description" content="Generate a custom image based on URL parameters.">
+  <meta property="og:image" content="https://catbuttons/404.png"> <!-- Static image or placeholder -->
+  <meta property="og:url" content="https://catbuttons.github.io"> <!-- Static URL -->
 
   <script>
     // Function to parse the URL parameters using only '?'
@@ -45,18 +46,6 @@
       document.body.appendChild(image); // Append the image to the body
     }
 
-    // Dynamically set Open Graph tags based on the current URL
-    function setOGTags() {
-      const params = getParams();
-      const color = params.color || 'defaultColor'; // Get color from URL or use default
-      const button = params.button || 'defaultButton'; // Get button from URL or use default
-      const imagePath = `https://image.github.io/${color}-${button}.png`; // Construct the image URL
-
-      // Set Open Graph meta tags
-      document.querySelector('meta[property="og:image"]').setAttribute('content', imagePath);
-      document.querySelector('meta[property="og:url"]').setAttribute('content', window.location.href); // Set the current page URL
-    }
-
     document.addEventListener("DOMContentLoaded", () => {
       const params = getParams();
 
@@ -76,9 +65,6 @@
         iframe.style.left = "0";
         document.body.appendChild(iframe);
       }
-
-      // Set Open Graph meta tags dynamically
-      setOGTags();
 
       // Generate the image if 'color' and 'button' parameters are present
       generateImage();
