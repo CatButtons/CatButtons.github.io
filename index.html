@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta property="og:title" content="Dynamic Image Loader">
   <meta property="og:description" content="Generate images dynamically based on URL parameters.">
-  <meta property="og:url" content="https://catbuttons.github.io"> <!-- Change this to your actual URL -->
-  <meta property="og:image" content="" id="og-image"> <!-- This will be dynamically set by JavaScript -->
+  <meta property="og:url" content="https://catbuttons.github.io"> <!-- Change to your URL -->
+  <meta property="og:image" content="" id="og-image">
   <meta property="og:type" content="website">
-  <title>Dynamic HTML Loader with Discord Image Generation</title>
+  <title>Dynamic Image Generator</title>
   <script>
     // Function to parse the URL parameters using only '?'
     function getParams() {
@@ -24,56 +24,49 @@
       return params;
     }
 
-    // Function to generate an image based on the URL parameters
+    // Function to generate an image using the Canvas API
     function generateImage() {
       const params = getParams();
-      const color = params.color || 'defaultColor'; // Default to 'defaultColor' if no color is provided
-      const button = params.button || 'defaultButton'; // Default to 'defaultButton' if no button is provided
+      const color = params.color || 'blue'; // Default color
+      const button = params.button || 'button'; // Default button name
 
-      // Check if the image exists in the directory
-      const imageName = `${color}-${button}.png`;
-      const imagePath = `./${imageName}`;
+      // Create a canvas element to draw the image
+      const canvas = document.createElement('canvas');
+      canvas.width = 200;
+      canvas.height = 100;
 
+      const ctx = canvas.getContext('2d');
+
+      // Draw the background color
+      ctx.fillStyle = color;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw the button text
+      ctx.fillStyle = 'white';
+      ctx.font = '20px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(button, canvas.width / 2, canvas.height / 2);
+
+      // Convert the canvas to an image and set it as the source
+      const dataUrl = canvas.toDataURL(); // Get base64 image data
+
+      // Set the image source to the generated data URL
       const image = new Image();
-      image.src = imagePath;
-      image.onerror = function() {
-        // If the image doesn't exist, show the fallback 404 image
-        image.src = './404.png';
-      };
-      document.body.appendChild(image); // Append the image to the body
+      image.src = dataUrl;
+      document.body.appendChild(image); // Append image to body
 
-      // Set the Open Graph image tag dynamically
+      // Update the Open Graph image tag to point to the generated image
       const ogImage = document.getElementById("og-image");
-      ogImage.content = imagePath; // This will point Discord to the generated image
+      ogImage.content = dataUrl; // Set Open Graph image meta tag to the generated image URL
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      const params = getParams();
-
-      // If the 'html' parameter is present, load the HTML file
-      if (params.html) {
-        const htmlFile = params.html;
-        const htmlPath = `./${htmlFile}.html`;
-        console.log(`Loading HTML content from: ${htmlPath}`);
-
-        const iframe = document.createElement("iframe");
-        iframe.src = htmlPath;
-        iframe.style.width = "100%";
-        iframe.style.height = "100vh";
-        iframe.style.border = "none";
-        iframe.style.position = "absolute";
-        iframe.style.top = "0";
-        iframe.style.left = "0";
-        document.body.appendChild(iframe);
-      }
-
-      // Generate the image if 'color' and 'button' parameters are present
-      generateImage();
+      generateImage(); // Generate the image when the page is loaded
     });
   </script>
 </head>
 <body style="margin: 0; overflow: hidden;">
-  <h1>Dynamic Content and Image Loader</h1>
+  <h1>Generated Image</h1>
 </body>
 </html>
-
