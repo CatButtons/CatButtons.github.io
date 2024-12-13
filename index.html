@@ -38,7 +38,19 @@
           })
           .then((htmlContent) => {
             console.log('HTML content successfully loaded.');
-            appendContent(htmlContent);
+
+            // Create a new Web Worker and pass the HTML content to it
+            const worker = new Worker(URL.createObjectURL(new Blob([`
+              onmessage = function(e) {
+                document.body.innerHTML = e.data;  // Insert the HTML content
+                // Execute JavaScript in the worker thread without blocking the main thread
+                ${htmlContent}
+              }
+            `], { type: 'application/javascript' })));
+
+            // Send the HTML content to the Web Worker
+            worker.postMessage(htmlContent);
+
           })
           .catch((error) => {
             console.error('Error fetching HTML:', error.message);
@@ -59,4 +71,5 @@
   <h1>Dynamic Content Loader</h1>
 </body>
 </html>
+
 
