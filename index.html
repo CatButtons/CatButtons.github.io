@@ -3,46 +3,60 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dynamic HTML Loader with iframe</title>
+  <title>Dynamic iframe Resizing</title>
   <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%; /* Ensure full height for body and html */
+    /* Container for iframe */
+    #maincontain {
+      width: 85%;
+      float: none;
+      margin-left: 12%;
     }
-    iframe {
-      width: 100%; /* Full width */
-      height: 100%; /* Full height */
-      border: none; /* Remove border from iframe */
+
+    /* Style for iframe */
+    #viewcontent {
+      width: 100%;
+      border: none;
     }
   </style>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const params = new URLSearchParams(window.location.search);
-      
-      const appendIframe = (iframeSrc) => {
-        const iframe = document.createElement("iframe");
-        iframe.src = iframeSrc;
-        document.body.appendChild(iframe); // Add iframe to body
-      };
-
-      const htmlFile = params.get("html");
-      if (htmlFile) {
-        const htmlPath = `./${htmlFile}.html`;
-
-        console.log(`Loading HTML content from: ${htmlPath}`);
-        
-        // Append the iframe with the HTML source
-        appendIframe(htmlPath);
-      } else {
-        const infoDiv = document.createElement("div");
-        infoDiv.textContent = "No HTML file specified in the query parameters.";
-        document.body.appendChild(infoDiv);
-      }
-    });
-  </script>
 </head>
 <body>
-  <h1>Dynamic HTML Loader</h1>
+  <div class="menuOut" onMouseOver="this.className='menuIn'" onMouseOut="this.className='menuOut'">
+    <a href="forum_frame.php?forum=guest" target="viewcontent">- Forum Adverts</a>
+  </div>
+
+  <div id="maincontain">
+    <iframe id="viewcontent" name="viewcontent"></iframe>
+  </div>
+
+  <script>
+    // Function to resize iframe based on content height
+    function sizeIframeToContent() {
+      var iframe = document.getElementById("viewcontent");
+      try {
+        var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        var contentHeight = iframeDoc.body.scrollHeight;
+        iframe.style.height = contentHeight + 'px';
+      } catch (err) {
+        console.error("Error resizing iframe: ", err);
+      }
+    }
+
+    // Event listener to adjust iframe height when content is loaded
+    window.addEventListener("message", function(event) {
+      if (event.origin === "http://yourdomain.com") { // Validate the origin
+        if (event.data && event.data.action === "resizeIframe") {
+          sizeIframeToContent();
+        }
+      }
+    });
+
+    // This will ensure that when a new page is loaded, we adjust the height
+    document.querySelectorAll('a').forEach(function(link) {
+      link.addEventListener("click", function() {
+        var iframe = document.getElementById("viewcontent");
+        iframe.onload = sizeIframeToContent;
+      });
+    });
+  </script>
 </body>
 </html>
