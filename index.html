@@ -3,55 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dynamic Content Loader with Image</title>
+  <title>Dynamic Image Loader</title>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      // Parse the custom URL format with `?` for multiple parameters
+      // Parse URL parameters using only "?" as separator
       const params = new URLSearchParams(window.location.search.replace(/\?/g, '&'));
 
-      // Extract parameters from the URL
-      const color = params.get('color') || 'white'; // Default color is white
-      const button = params.get('button') || 'default';
-      const htmlFile = params.get('html') || '';
+      // Get the values of color, button, and html
+      const color = params.get("color") || "default";  // Default color if not provided
+      const button = params.get("button") || "default";  // Default button if not provided
+      const htmlFile = params.get("html");
 
-      // Function to generate the image (or simulate it)
-      const generateImage = () => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = 500; // Width of the image
-        canvas.height = 500; // Height of the image
+      // Generate the image name based on color and button (e.g., red-cool.png)
+      const imageName = `${color}-${button}.png`;
 
-        // Set background color from the color parameter
-        ctx.fillStyle = color;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Build the image URL (searching for the generated image in the current directory)
+      const imageUrl = `./${imageName}`;
 
-        // Add some text on the image
-        ctx.fillStyle = 'black';
-        ctx.font = '30px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(button, canvas.width / 2, canvas.height / 2);
+      // Create an image element
+      const image = new Image();
+      image.src = imageUrl;
 
-        // Convert canvas to image URL
-        return canvas.toDataURL(); // This is a base64 image URL
+      // Check if the image exists, otherwise serve a default 404.png
+      image.onload = () => {
+        document.body.appendChild(image);  // Append the image if found
       };
 
-      // Insert the generated image into the page
-      const insertImage = (imageUrl) => {
-        const img = document.createElement('img');
-        img.src = imageUrl;
-        img.style.width = '100%';
-        img.style.height = 'auto';
-        document.body.appendChild(img);
+      image.onerror = () => {
+        const errorImage = new Image();
+        errorImage.src = './404.png';  // Serve 404.png if the image doesn't exist
+        document.body.appendChild(errorImage);
       };
 
-      // Insert the generated image
-      const imageUrl = generateImage();
-      insertImage(imageUrl);
-
-      // Function to load HTML content in an iframe (as before)
-      const appendIframe = (iframeSrc) => {
+      // If an HTML file is specified, dynamically load the HTML into an iframe
+      if (htmlFile) {
+        const htmlPath = `./${htmlFile}.html`;
         const iframe = document.createElement("iframe");
-        iframe.src = iframeSrc;
+        iframe.src = htmlPath;
         iframe.style.width = "100%";
         iframe.style.height = "100vh";
         iframe.style.border = "none";
@@ -59,13 +47,6 @@
         iframe.style.top = "0";
         iframe.style.left = "0";
         document.body.appendChild(iframe);
-      };
-
-      // If html file is provided, load it in an iframe
-      if (htmlFile) {
-        const htmlPath = `./${htmlFile}.html`;
-        console.log(`Loading HTML content from: ${htmlPath}`);
-        appendIframe(htmlPath);
       }
     });
   </script>
