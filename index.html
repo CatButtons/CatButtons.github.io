@@ -8,19 +8,28 @@
     document.addEventListener("DOMContentLoaded", () => {
       const params = new URLSearchParams(window.location.search);
 
-      // Helper to append fetched content safely
-      const appendToBody = (element) => {
-        if (element && document.body) {
-          document.body.appendChild(element);
-        }
+      // Function to append fetched content into the page
+      const appendContent = (htmlContent) => {
+        const container = document.createElement("div");
+        container.innerHTML = htmlContent;
+
+        // Check if fetched content contains <script> tags
+        const scripts = container.querySelectorAll("script");
+        scripts.forEach((script) => {
+          const newScript = document.createElement("script");
+          newScript.textContent = script.textContent; // Copy the script content
+          document.body.appendChild(newScript); // Re-execute the script
+          script.remove(); // Remove the old script to avoid duplication
+        });
+
+        document.body.appendChild(container); // Add the rest of the content
       };
 
-      // 2. Handle HTML Loading
+      // Handle HTML Loading
       const htmlFile = params.get("html");
       if (htmlFile) {
         const htmlPath = `./${htmlFile}.html`;
 
-        // Fetch and load the HTML file
         fetch(htmlPath)
           .then((response) => {
             if (response.ok) {
@@ -30,25 +39,19 @@
             }
           })
           .then((htmlContent) => {
-            // Create a container for the fetched HTML
-            const div = document.createElement("div");
-            div.innerHTML = htmlContent;
-            appendToBody(div);
+            appendContent(htmlContent); // Append the fetched content
           })
           .catch((error) => {
             console.error(error.message);
-
-            // Show an error message if the file isn't found
             const errorDiv = document.createElement("div");
             errorDiv.style.color = "red";
             errorDiv.textContent = `Error: Unable to load ${htmlFile}.html.`;
-            appendToBody(errorDiv);
+            document.body.appendChild(errorDiv);
           });
       } else {
-        // No HTML parameter provided, show a message
         const infoDiv = document.createElement("div");
         infoDiv.textContent = "No HTML file specified in the query parameters.";
-        appendToBody(infoDiv);
+        document.body.appendChild(infoDiv);
       }
     });
   </script>
@@ -57,5 +60,4 @@
   <h1>Dynamic Content Loader</h1>
 </body>
 </html>
-
 
