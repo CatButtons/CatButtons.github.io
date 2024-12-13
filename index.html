@@ -3,18 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta property="og:title" content="Dynamic Image Loader">
-  <meta property="og:description" content="Generate images dynamically based on URL parameters.">
-  <meta property="og:url" content="https://catbuttons.github.io"> <!-- Change to your URL -->
-  <meta property="og:image" content="" id="og-image">
-  <meta property="og:type" content="website">
-  <title>Dynamic Image Generator</title>
+  <title>Dynamic HTML Loader and Image Serving</title>
   <script>
-    // Function to parse the URL parameters using only '?'
-    function getParams() {
-      const query = window.location.search.slice(1); // Remove the leading '?'
+    // Function to parse the custom query string with ? instead of &
+    function getUrlParams() {
       const params = {};
-      const pairs = query.split('?');
+      const queryString = window.location.search.slice(1); // Remove the leading "?"
+      const pairs = queryString.split('?'); // Split by custom ? separator
       pairs.forEach(pair => {
         const [key, value] = pair.split('=');
         if (key && value) {
@@ -24,49 +19,73 @@
       return params;
     }
 
-    // Function to generate an image using the Canvas API
-    function generateImage() {
-      const params = getParams();
-      const color = params.color || 'blue'; // Default color
-      const button = params.button || 'button'; // Default button name
-
-      // Create a canvas element to draw the image
-      const canvas = document.createElement('canvas');
-      canvas.width = 200;
-      canvas.height = 100;
-
-      const ctx = canvas.getContext('2d');
-
-      // Draw the background color
-      ctx.fillStyle = color;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Draw the button text
-      ctx.fillStyle = 'white';
-      ctx.font = '20px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(button, canvas.width / 2, canvas.height / 2);
-
-      // Convert the canvas to an image and set it as the source
-      const dataUrl = canvas.toDataURL(); // Get base64 image data
-
-      // Set the image source to the generated data URL
-      const image = new Image();
-      image.src = dataUrl;
-      document.body.appendChild(image); // Append image to body
-
-      // Update the Open Graph image tag to point to the generated image
-      const ogImage = document.getElementById("og-image");
-      ogImage.content = dataUrl; // Set Open Graph image meta tag to the generated image URL
+    // Function to load the HTML based on the query parameters
+    function loadHTML(params) {
+      const htmlFile = params.html;
+      if (htmlFile) {
+        const htmlPath = `./${htmlFile}.html`;
+        console.log(`Loading HTML content from: ${htmlPath}`);
+        fetch(htmlPath)
+          .then(response => {
+            if (response.ok) {
+              return response.text();
+            } else {
+              throw new Error("Failed to load HTML file.");
+            }
+          })
+          .then(htmlContent => {
+            // Create an iframe and insert the HTML content
+            const iframe = document.createElement("iframe");
+            iframe.srcdoc = htmlContent;
+            iframe.style.width = "100%";
+            iframe.style.height = "100vh";
+            iframe.style.border = "none";
+            iframe.style.position = "absolute";
+            iframe.style.top = "0";
+            iframe.style.left = "0";
+            document.body.appendChild(iframe);
+          })
+          .catch(error => {
+            console.error(error);
+            document.body.innerHTML = "Error loading HTML content.";
+          });
+      }
     }
 
+    // Function to serve an image based on the query parameters
+    function serveImage(params) {
+      const color = params.color || 'default';
+      const button = params.button || 'default';
+      const imageName = `${color}-${button}.png`;
+      
+      const img = new Image();
+      img.src = `./${imageName}`; // Check if the image exists in the same directory
+
+      img.onload = () => {
+        document.body.appendChild(img); // If the image exists, show it
+      };
+
+      img.onerror = () => {
+        const fallbackImg = new Image();
+        fallbackImg.src = './404.png'; // Fallback image if the desired image isn't found
+        document.body.appendChild(fallbackImg);
+      };
+    }
+
+    // Execute the necessary function based on URL parameters
     document.addEventListener("DOMContentLoaded", () => {
-      generateImage(); // Generate the image when the page is loaded
+      const params = getUrlParams();
+
+      // Check if it's an image request (check if `color` and `button` are present)
+      if (params.color || params.button) {
+        serveImage(params);
+      } else {
+        loadHTML(params);
+      }
     });
   </script>
 </head>
 <body style="margin: 0; overflow: hidden;">
-  <h1>Generated Image</h1>
+  <h1>Dynamic Content Loader and Image Server</h1>
 </body>
 </html>
