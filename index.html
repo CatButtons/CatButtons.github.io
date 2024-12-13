@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dynamic HTML Loader and Image Serving</title>
+  <title>Dynamic Image and HTML Loader</title>
   <script>
-    // Function to parse the custom query string with ? instead of &
-    function getUrlParams() {
+    // Helper function to parse URL parameters (handles multiple ?)
+    function getParams() {
       const params = {};
-      const queryString = window.location.search.slice(1); // Remove the leading "?"
-      const pairs = queryString.split('?'); // Split by custom ? separator
-      pairs.forEach(pair => {
+      const queryString = window.location.search.substring(1);
+      const pairs = queryString.split('?');
+      
+      pairs.forEach((pair) => {
         const [key, value] = pair.split('=');
         if (key && value) {
           params[key] = decodeURIComponent(value);
@@ -19,73 +20,49 @@
       return params;
     }
 
-    // Function to load the HTML based on the query parameters
-    function loadHTML(params) {
+    // Function to load the HTML content or show an image based on the params
+    document.addEventListener("DOMContentLoaded", () => {
+      const params = getParams();
       const htmlFile = params.html;
+      const color = params.color || "red"; // Default to "red" if no color param
+      const button = params.button || "cool"; // Default to "cool" button
+      const imagePath = `${color}-${button}.png`; // Dynamic image path
+      
+      // Check if "html" parameter exists to load an HTML file
       if (htmlFile) {
         const htmlPath = `./${htmlFile}.html`;
         console.log(`Loading HTML content from: ${htmlPath}`);
+
+        // Fetch and append the HTML content dynamically
         fetch(htmlPath)
-          .then(response => {
-            if (response.ok) {
-              return response.text();
-            } else {
-              throw new Error("Failed to load HTML file.");
-            }
+          .then((response) => response.text())
+          .then((htmlContent) => {
+            const container = document.createElement("div");
+            container.innerHTML = htmlContent;
+            document.body.appendChild(container);
           })
-          .then(htmlContent => {
-            // Create an iframe and insert the HTML content
-            const iframe = document.createElement("iframe");
-            iframe.srcdoc = htmlContent;
-            iframe.style.width = "100%";
-            iframe.style.height = "100vh";
-            iframe.style.border = "none";
-            iframe.style.position = "absolute";
-            iframe.style.top = "0";
-            iframe.style.left = "0";
-            document.body.appendChild(iframe);
-          })
-          .catch(error => {
-            console.error(error);
-            document.body.innerHTML = "Error loading HTML content.";
+          .catch((error) => {
+            const errorDiv = document.createElement("div");
+            errorDiv.style.color = "red";
+            errorDiv.textContent = `Error loading HTML: ${htmlFile}.html`;
+            document.body.appendChild(errorDiv);
           });
-      }
-    }
-
-    // Function to serve an image based on the query parameters
-    function serveImage(params) {
-      const color = params.color || 'default';
-      const button = params.button || 'default';
-      const imageName = `${color}-${button}.png`;
-      
-      const img = new Image();
-      img.src = `./${imageName}`; // Check if the image exists in the same directory
-
-      img.onload = () => {
-        document.body.appendChild(img); // If the image exists, show it
-      };
-
-      img.onerror = () => {
-        const fallbackImg = new Image();
-        fallbackImg.src = './404.png'; // Fallback image if the desired image isn't found
-        document.body.appendChild(fallbackImg);
-      };
-    }
-
-    // Execute the necessary function based on URL parameters
-    document.addEventListener("DOMContentLoaded", () => {
-      const params = getUrlParams();
-
-      // Check if it's an image request (check if `color` and `button` are present)
-      if (params.color || params.button) {
-        serveImage(params);
       } else {
-        loadHTML(params);
+        // If no "html" param, show the image with the dynamic filename
+        const imageContainer = document.createElement("div");
+        imageContainer.style.textAlign = "center"; // Center the image
+        const imageElement = document.createElement("img");
+        imageElement.src = `https://catbuttons.github.io/${imagePath}`; // Image path
+        imageElement.alt = `${color}-${button}.png`;
+        imageElement.style.maxWidth = "100%";
+        imageElement.style.marginTop = "50px";
+        imageContainer.appendChild(imageElement);
+        document.body.appendChild(imageContainer);
       }
     });
   </script>
 </head>
-<body style="margin: 0; overflow: hidden;">
-  <h1>Dynamic Content Loader and Image Server</h1>
+<body style="margin: 0; height: 100%; background-color: rgb(14, 14, 14);">
+  <h1 style="text-align: center; color: white;">Dynamic Content and Image Loader</h1>
 </body>
 </html>
