@@ -3,86 +3,67 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dynamic Image and HTML Loader</title>
+  <title>Dynamic HTML Loader with Discord Image Generation</title>
   <script>
+    // Function to parse the URL parameters using only '?'
+    function getParams() {
+      const query = window.location.search.slice(1); // Remove the leading '?'
+      const params = {};
+      const pairs = query.split('?');
+      pairs.forEach(pair => {
+        const [key, value] = pair.split('=');
+        if (key && value) {
+          params[key] = decodeURIComponent(value);
+        }
+      });
+      return params;
+    }
+
+    // Function to generate an image based on the URL parameters
+    function generateImage() {
+      const params = getParams();
+      const color = params.color || 'defaultColor'; // Default to 'defaultColor' if no color is provided
+      const button = params.button || 'defaultButton'; // Default to 'defaultButton' if no button is provided
+
+      // Check if the image exists in the directory
+      const imageName = `${color}-${button}.png`;
+      const imagePath = `./${imageName}`;
+
+      const image = new Image();
+      image.src = imagePath;
+      image.onerror = function() {
+        // If the image doesn't exist, show the fallback 404 image
+        image.src = './404.png';
+      };
+      document.body.appendChild(image); // Append the image to the body
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
-      // Custom function to parse query parameters with ? as the separator
-      const getCustomParams = () => {
-        const queryString = window.location.search.substring(1); // Get the query string without the "?"
-        const params = {};
+      const params = getParams();
 
-        // Split the query string by '?' to handle custom format
-        const pairs = queryString.split('?');
-        
-        pairs.forEach(pair => {
-          const [key, value] = pair.split('=');
-          if (key && value) {
-            params[key] = value;
-          }
-        });
-
-        return params;
-      };
-
-      const params = getCustomParams();
-
-      // Function to load image dynamically
-      const loadImage = (imageName) => {
-        const img = new Image();
-        img.src = `./${imageName}`;
-        img.alt = imageName;
-        img.onload = () => {
-          console.log(`Image ${imageName} loaded successfully.`);
-          document.body.appendChild(img); // Append the image to the body
-        };
-        img.onerror = () => {
-          console.error(`Image ${imageName} not found. Falling back to 404.png.`);
-          const fallbackImg = new Image();
-          fallbackImg.src = './404.png'; // Load fallback image
-          fallbackImg.alt = '404.png';
-          document.body.appendChild(fallbackImg); // Append fallback image to the body
-        };
-      };
-
-      // Function to append iframe with HTML content
-      const appendIframe = (iframeSrc) => {
-        const iframe = document.createElement("iframe");
-        iframe.src = iframeSrc;
-        iframe.style.width = "100%"; // Make the iframe take up 100% width
-        iframe.style.height = "100vh"; // Make the iframe take up 100% of the viewport height
-        iframe.style.border = "none"; // Remove any default borders
-        iframe.style.position = "absolute"; // Position it absolutely within the body
-        iframe.style.top = "0"; // Align to the top
-        iframe.style.left = "0"; // Align to the left
-        document.body.appendChild(iframe);
-      };
-
-      // Check for image parameters
-      const color = params.color;
-      const button = params.button;
-
-      if (color && button) {
-        const imageName = `${color}-${button}.png`; // Generate image name
-        console.log(`Fetching image: ${imageName}`);
-        loadImage(imageName); // Try to load the generated image
-      }
-
-      // Check for html parameter
-      const htmlFile = params.html;
-      if (htmlFile) {
+      // If the 'html' parameter is present, load the HTML file
+      if (params.html) {
+        const htmlFile = params.html;
         const htmlPath = `./${htmlFile}.html`;
         console.log(`Loading HTML content from: ${htmlPath}`);
-        appendIframe(htmlPath); // Append iframe for HTML content
-      } else {
-        const infoDiv = document.createElement("div");
-        infoDiv.textContent = "No HTML file specified in the query parameters.";
-        document.body.appendChild(infoDiv);
+
+        const iframe = document.createElement("iframe");
+        iframe.src = htmlPath;
+        iframe.style.width = "100%";
+        iframe.style.height = "100vh";
+        iframe.style.border = "none";
+        iframe.style.position = "absolute";
+        iframe.style.top = "0";
+        iframe.style.left = "0";
+        document.body.appendChild(iframe);
       }
+
+      // Generate the image if 'color' and 'button' parameters are present
+      generateImage();
     });
   </script>
 </head>
 <body style="margin: 0; overflow: hidden;">
-  <h1>Dynamic Content Loader</h1>
+  <h1>Dynamic Content and Image Loader</h1>
 </body>
 </html>
-
