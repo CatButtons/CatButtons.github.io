@@ -4,6 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dynamic HTML Loader with Discord Image Generation</title>
+
+  <!-- Open Graph Meta Tags for Discord Image Preview -->
+  <meta property="og:title" content="Custom Image for Discord">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content=""> <!-- Will be dynamically set via JS -->
+  <meta property="og:description" content="Generate a custom image based on URL parameters.">
+
   <script>
     // Function to parse the URL parameters using only '?'
     function getParams() {
@@ -38,6 +45,18 @@
       document.body.appendChild(image); // Append the image to the body
     }
 
+    // Dynamically set Open Graph tags based on the current URL
+    function setOGTags() {
+      const params = getParams();
+      const color = params.color || 'defaultColor'; // Get color from URL or use default
+      const button = params.button || 'defaultButton'; // Get button from URL or use default
+      const imagePath = `https://image.github.io/${color}-${button}.png`; // Construct the image URL
+
+      // Set Open Graph meta tags
+      document.querySelector('meta[property="og:image"]').setAttribute('content', imagePath);
+      document.querySelector('meta[property="og:url"]').setAttribute('content', window.location.href); // Set the current page URL
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       const params = getParams();
 
@@ -57,6 +76,9 @@
         iframe.style.left = "0";
         document.body.appendChild(iframe);
       }
+
+      // Set Open Graph meta tags dynamically
+      setOGTags();
 
       // Generate the image if 'color' and 'button' parameters are present
       generateImage();
