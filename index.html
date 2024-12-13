@@ -3,15 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dynamic HTML Loader with Discord Image Generation</title>
-
-  <!-- Open Graph Meta Tags for Discord Image Preview -->
-  <meta property="og:title" content="Custom Image for Discord">
+  <meta property="og:title" content="Dynamic Image Loader">
+  <meta property="og:description" content="Generate images dynamically based on URL parameters.">
+  <meta property="og:url" content="https://catbuttons.github.io"> <!-- Change this to your actual URL -->
+  <meta property="og:image" content="" id="og-image"> <!-- This will be dynamically set by JavaScript -->
   <meta property="og:type" content="website">
-  <meta property="og:description" content="Generate a custom image based on URL parameters.">
-  <meta property="og:image" content="https://catbuttons/404.png"> <!-- Static image or placeholder -->
-  <meta property="og:url" content="https://catbuttons.github.io"> <!-- Static URL -->
-
+  <title>Dynamic HTML Loader with Discord Image Generation</title>
   <script>
     // Function to parse the URL parameters using only '?'
     function getParams() {
@@ -44,6 +41,10 @@
         image.src = './404.png';
       };
       document.body.appendChild(image); // Append the image to the body
+
+      // Set the Open Graph image tag dynamically
+      const ogImage = document.getElementById("og-image");
+      ogImage.content = imagePath; // This will point Discord to the generated image
     }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -75,3 +76,4 @@
   <h1>Dynamic Content and Image Loader</h1>
 </body>
 </html>
+
