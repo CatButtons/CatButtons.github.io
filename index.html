@@ -27,13 +27,23 @@
       const color = params.color || "red"; // Default to "red" if no color param
       const button = params.button || "cool"; // Default to "cool" button
       const imagePath = `${color}-${button}.png`; // Dynamic image path
-      
-      // Check if "html" parameter exists to load an HTML file
-      if (htmlFile) {
+
+      // If no "html" parameter, load and show the image only
+      if (!htmlFile) {
+        const imageContainer = document.createElement("div");
+        imageContainer.style.textAlign = "center"; // Center the image
+        const imageElement = document.createElement("img");
+        imageElement.src = `https://catbuttons.github.io/${imagePath}`; // Image path
+        imageElement.alt = `${color}-${button}.png`;
+        imageElement.style.maxWidth = "100%";
+        imageElement.style.marginTop = "50px";
+        imageContainer.appendChild(imageElement);
+        document.body.appendChild(imageContainer);
+      } else {
+        // If "html" param exists, fetch and append the HTML content
         const htmlPath = `./${htmlFile}.html`;
         console.log(`Loading HTML content from: ${htmlPath}`);
 
-        // Fetch and append the HTML content dynamically
         fetch(htmlPath)
           .then((response) => response.text())
           .then((htmlContent) => {
@@ -47,22 +57,12 @@
             errorDiv.textContent = `Error loading HTML: ${htmlFile}.html`;
             document.body.appendChild(errorDiv);
           });
-      } else {
-        // If no "html" param, show the image with the dynamic filename
-        const imageContainer = document.createElement("div");
-        imageContainer.style.textAlign = "center"; // Center the image
-        const imageElement = document.createElement("img");
-        imageElement.src = `https://catbuttons.github.io/${imagePath}`; // Image path
-        imageElement.alt = `${color}-${button}.png`;
-        imageElement.style.maxWidth = "100%";
-        imageElement.style.marginTop = "50px";
-        imageContainer.appendChild(imageElement);
-        document.body.appendChild(imageContainer);
       }
     });
   </script>
 </head>
 <body style="margin: 0; height: 100%; background-color: rgb(14, 14, 14);">
-  <h1 style="text-align: center; color: white;">Dynamic Content and Image Loader</h1>
+  <!-- No other content should be here if we're showing the image -->
 </body>
 </html>
+
