@@ -1,51 +1,67 @@
-<script>
-    // Function to parse the URL and extract parameters
-    function getImage() {
-        const urlParams = new URLSearchParams(window.location.search);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Loader</title>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const params = new URLSearchParams(window.location.search);
+      
+      // 1. Handle Image Loading
+      const color = params.get("color");
+      const button = params.get("button");
+      if (color && button) {
+        const imageName = `${color}-${button}.png`;
+        const imgElement = document.createElement("img");
+        const imagePath = `./${imageName}`;
+        
+        // Check if the image exists
+        fetch(imagePath)
+          .then((response) => {
+            if (response.ok) {
+              imgElement.src = imagePath;
+            } else {
+              imgElement.src = "./404.png";
+            }
+          })
+          .catch(() => {
+            imgElement.src = "./404.png";
+          });
+        
+        document.body.appendChild(imgElement);
+      }
 
-        // Extract parameters from the query string
-        const color = urlParams.get("color") || ""; // Default to empty string if color is not provided
-        const button = urlParams.get("button");  // e.g., "imagename"
-        const htmlFile = urlParams.get("html");  // e.g., "htmlfile"
+      // 2. Handle HTML Loading
+      const htmlFile = params.get("html");
+      if (htmlFile) {
+        const htmlPath = `./${htmlFile}.html`;
 
-        // Handle missing button or image
-        if (!button) {
-            setImageFallback("/404.png"); // Correct relative path for 404.png
-            return;
-        }
+        fetch(htmlPath)
+          .then((response) => {
+            if (response.ok) {
+              return response.text();
+            } else {
+              throw new Error("HTML file not found");
+            }
+          })
+          .then((htmlContent) => {
+            const div = document.createElement("div");
+            div.innerHTML = htmlContent;
+            document.body.appendChild(div);
+          })
+          .catch((error) => {
+            console.error(error.message);
+            const errorDiv = document.createElement("div");
+            errorDiv.textContent = "Requested HTML file not found.";
+            document.body.appendChild(errorDiv);
+          });
+      }
+    });
+  </script>
+</head>
+<body>
+  <h1>Dynamic Content Loader</h1>
+</body>
+</html>
 
-        // Combine color and button name to form the image filename (e.g., color=red & button=imagename -> redimagename.png)
-        const imageName = (color + button).toLowerCase() + ".png";  // Combine color and button for the image name
-        const imageUrl = imageName;  // Image is located in the same repo, so use just the image name
-
-        // Set Open Graph and Twitter meta tags dynamically
-        document.getElementById("og-image").setAttribute("content", imageUrl);
-        document.getElementById("twitter-image").setAttribute("content", imageUrl);
-
-        // Set the image element's src
-        const imgElement = document.getElementById("image");
-        imgElement.src = imageUrl;
-
-        // Fallback if the image is not found: use 404.png
-        imgElement.onerror = function() {
-            setImageFallback("/404.png"); // Use the correct relative path
-        };
-
-        // If htmlFile is provided, redirect to the corresponding HTML page
-        if (htmlFile) {
-            const htmlFileName = htmlFile.toLowerCase() + ".html"; // Ensure case-insensitive lookup
-            window.location.href = htmlFileName; // Redirect to the HTML file
-        }
-    }
-
-    // Set image fallback and update meta tags
-    function setImageFallback(imageUrl) {
-        document.getElementById("og-image").setAttribute("content", imageUrl);
-        document.getElementById("twitter-image").setAttribute("content", imageUrl);
-        const imgElement = document.getElementById("image");
-        imgElement.src = imageUrl;
-    }
-
-    // Call getImage when the page loads
-    window.onload = getImage;
-</script>
