@@ -3,11 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dynamic HTML Loader with iframe</title>
+  <title>Dynamic Image and HTML Loader</title>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      const params = new URLSearchParams(window.location.search);
-      
+      // Custom function to parse query parameters with ? as the separator
+      const getCustomParams = () => {
+        const queryString = window.location.search.substring(1); // Get the query string without the "?"
+        const params = {};
+
+        // Split the query string by '?' to handle custom format
+        const pairs = queryString.split('?');
+        
+        pairs.forEach(pair => {
+          const [key, value] = pair.split('=');
+          if (key && value) {
+            params[key] = value;
+          }
+        });
+
+        return params;
+      };
+
+      const params = getCustomParams();
+
+      // Function to load image dynamically
+      const loadImage = (imageName) => {
+        const img = new Image();
+        img.src = `./${imageName}`;
+        img.alt = imageName;
+        img.onload = () => {
+          console.log(`Image ${imageName} loaded successfully.`);
+          document.body.appendChild(img); // Append the image to the body
+        };
+        img.onerror = () => {
+          console.error(`Image ${imageName} not found. Falling back to 404.png.`);
+          const fallbackImg = new Image();
+          fallbackImg.src = './404.png'; // Load fallback image
+          fallbackImg.alt = '404.png';
+          document.body.appendChild(fallbackImg); // Append fallback image to the body
+        };
+      };
+
+      // Function to append iframe with HTML content
       const appendIframe = (iframeSrc) => {
         const iframe = document.createElement("iframe");
         iframe.src = iframeSrc;
@@ -20,14 +57,22 @@
         document.body.appendChild(iframe);
       };
 
-      const htmlFile = params.get("html");
+      // Check for image parameters
+      const color = params.color;
+      const button = params.button;
+
+      if (color && button) {
+        const imageName = `${color}-${button}.png`; // Generate image name
+        console.log(`Fetching image: ${imageName}`);
+        loadImage(imageName); // Try to load the generated image
+      }
+
+      // Check for html parameter
+      const htmlFile = params.html;
       if (htmlFile) {
         const htmlPath = `./${htmlFile}.html`;
-
         console.log(`Loading HTML content from: ${htmlPath}`);
-        
-        // Append the iframe with the HTML source
-        appendIframe(htmlPath);
+        appendIframe(htmlPath); // Append iframe for HTML content
       } else {
         const infoDiv = document.createElement("div");
         infoDiv.textContent = "No HTML file specified in the query parameters.";
@@ -36,7 +81,8 @@
     });
   </script>
 </head>
-<body style="margin: 0; overflow: hidden;"> <!-- Make sure no extra space is added -->
-  <h1>Dynamic HTML Loader</h1>
+<body style="margin: 0; overflow: hidden;">
+  <h1>Dynamic Content Loader</h1>
 </body>
 </html>
+
